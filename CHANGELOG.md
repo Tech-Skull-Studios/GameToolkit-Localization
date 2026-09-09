@@ -4,6 +4,10 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.2.4] - 2026-09-08
+### News
+- Fixed compatibility of package with Unity 6.5+
+
 ## [2.2.3] - 2023-04-16
 ### News
 - Fixed a bug that multiple `LocalizationSettings` assets created if Library folder is deleted
