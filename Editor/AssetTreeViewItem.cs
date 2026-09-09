@@ -5,7 +5,11 @@ using UnityEditor.IMGUI.Controls;
 
 namespace GameToolkit.Localization.Editor
 {
+    #if UNITY_6000_5_OR_NEWER
+    public class AssetTreeViewItem : TreeViewItem<int>
+    #else
     public class AssetTreeViewItem : TreeViewItem
+    #endif
     {
         private bool m_IsDirty;
 
@@ -31,7 +35,11 @@ namespace GameToolkit.Localization.Editor
 
         public LocalizedAssetBase LocalizedAsset { get; private set; }
 
+        #if UNITY_6000_5_OR_NEWER
+        public AssetTreeViewItem(int id, int depth, LocalizedAssetBase data) : base(id, depth, data.name)
+        #else
         public AssetTreeViewItem(int depth, LocalizedAssetBase data) : base(data.GetInstanceID(), depth, data.name)
+        #endif
         {
             LocalizedAsset = data;
         }

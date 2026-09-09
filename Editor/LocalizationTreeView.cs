@@ -10,7 +10,11 @@ using System.Collections.Generic;
 
 namespace GameToolkit.Localization.Editor
 {
+    #if UNITY_6000_5_OR_NEWER
+    public class LocalizationTreeView : TreeView<int>
+    #else
     public class LocalizationTreeView : TreeView
+    #endif
     {
         private const float RowHeight = 20f;
         private const float ToggleWidth = 18f;
@@ -30,7 +34,11 @@ namespace GameToolkit.Localization.Editor
         private float m_ValueColumnWidth = 0;
         private GUIStyle m_TextAreaStyle;
 
+        #if UNITY_6000_5_OR_NEWER
+        public LocalizationTreeView(TreeViewState<int> state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
+        #else
         public LocalizationTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
+        #endif
         {
             m_TextAreaStyle = new GUIStyle(EditorStyles.textArea);
             m_TextAreaStyle.wordWrap = true;
@@ -46,6 +54,31 @@ namespace GameToolkit.Localization.Editor
             Reload();
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        protected override TreeViewItem<int> BuildRoot()
+        {
+            m_ElementId = FirstElementId;
+
+            var root = new TreeViewItem<int> { id = 0, depth = -1, displayName = "Root" };
+            var allItems = new List<TreeViewItem<int>>();
+
+            foreach (var localizedAsset in Localization.FindAllLocalizedAssets())
+            {
+                // id, depth, data
+                var assetItem = new AssetTreeViewItem(m_ElementId++, 0, localizedAsset);
+                allItems.Add(assetItem);
+
+                var localItems = localizedAsset.LocaleItems;
+                for (int i = 0; i < localItems.Length; i++)
+                {
+                    allItems.Add(new LocaleTreeViewItem(m_ElementId++, 1, localItems[i], assetItem));
+                }
+            }
+
+            SetupParentsAndChildrenFromDepths(root, allItems);
+            return root;
+        }
+        #else
         protected override TreeViewItem BuildRoot()
         {
             m_ElementId = FirstElementId;
@@ -74,6 +107,7 @@ namespace GameToolkit.Localization.Editor
             SetupParentsAndChildrenFromDepths(root, allItems);
             return root;
         }
+        #endif
 
         protected override void RowGUI(RowGUIArgs args)
         {
@@ -95,7 +129,11 @@ namespace GameToolkit.Localization.Editor
         /// <summary>
         /// Make TextArea as expandable as possible.
         /// </summary>
+        #if UNITY_6000_5_OR_NEWER
+        protected override float GetCustomRowHeight(int row, TreeViewItem<int> item)
+        #else
         protected override float GetCustomRowHeight(int row, TreeViewItem item)
+        #endif
         {
             var rowHeight = base.GetCustomRowHeight(row, item);
             var localeItem = item as LocaleTreeViewItem;
@@ -117,7 +155,11 @@ namespace GameToolkit.Localization.Editor
         }
 
         private Rect m_CellRect;
+        #if UNITY_6000_5_OR_NEWER
+        void CellGUI(Rect cellRect, TreeViewItem<int> item, ColumnType column, ref RowGUIArgs args)
+        #else
         void CellGUI(Rect cellRect, TreeViewItem item, ColumnType column, ref RowGUIArgs args)
+        #endif
         {
             switch (column)
             {
@@ -136,7 +178,11 @@ namespace GameToolkit.Localization.Editor
             }
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        private void DrawTypeCell(Rect cellRect, TreeViewItem<int> item)
+        #else
         private void DrawTypeCell(Rect cellRect, TreeViewItem item)
+        #endif
         {
             CenterRectUsingSingleLineHeight(ref cellRect);
             var treeViewItem = item as AssetTreeViewItem;
@@ -167,14 +213,22 @@ namespace GameToolkit.Localization.Editor
             }
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        private void DrawNameCell(Rect cellRect, TreeViewItem<int> item, ref RowGUIArgs args)
+        #else
         private void DrawNameCell(Rect cellRect, TreeViewItem item, ref RowGUIArgs args)
+        #endif
         {
             CenterRectUsingSingleLineHeight(ref cellRect);
             args.rowRect = cellRect;
             base.RowGUI(args);
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        private void DrawLanguageCell(Rect cellRect, TreeViewItem<int> item)
+        #else
         private void DrawLanguageCell(Rect cellRect, TreeViewItem item)
+        #endif
         {
             cellRect.y += 2;
             cellRect.height -= 4;
@@ -185,7 +239,11 @@ namespace GameToolkit.Localization.Editor
             }
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        private void DrawValueCell(Rect cellRect, TreeViewItem<int> item)
+        #else
         private void DrawValueCell(Rect cellRect, TreeViewItem item)
+        #endif
         {
             cellRect.y += 2;
             cellRect.height -= 4;
@@ -221,7 +279,11 @@ namespace GameToolkit.Localization.Editor
             }
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        protected override bool CanRename(TreeViewItem<int> item)
+        #else
         protected override bool CanRename(TreeViewItem item)
+        #endif
         {
             if (item is AssetTreeViewItem)
             {
@@ -241,7 +303,11 @@ namespace GameToolkit.Localization.Editor
                 var item = FindItem(args.itemID, rootItem) as AssetTreeViewItem;
                 if (item != null)
                 {
+                    #if UNITY_6000_5_OR_NEWER
+                    var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetEntityId());
+                    #else
                     var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetInstanceID());
+                    #endif
                     AssetDatabase.RenameAsset(assetPath, args.newName);
                     AssetDatabase.SaveAssets();
                     Reload();
@@ -249,7 +315,11 @@ namespace GameToolkit.Localization.Editor
             }
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        public TreeViewItem<int> GetSelectedItem()
+        #else
         public TreeViewItem GetSelectedItem()
+        #endif
         {
             var selection = GetSelection();
             if (selection.Count > 0)
@@ -259,7 +329,11 @@ namespace GameToolkit.Localization.Editor
             return null;
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        protected override Rect GetRenameRect(Rect rowRect, int row, TreeViewItem<int> item)
+        #else
         protected override Rect GetRenameRect(Rect rowRect, int row, TreeViewItem item)
+        #endif
         {
             var cellRect = GetCellRectForTreeFoldouts(rowRect);
             CenterRectUsingSingleLineHeight(ref cellRect);

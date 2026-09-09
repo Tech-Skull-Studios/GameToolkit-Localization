@@ -21,7 +21,11 @@ namespace GameToolkit.Localization.Editor
         private bool m_Initialized;
 
         [SerializeField]
+        #if UNITY_6000_5_OR_NEWER
+        private TreeViewState<int> m_TreeViewState; // Serialized in the window layout file so it survives assembly reloading
+        #else
         private TreeViewState m_TreeViewState; // Serialized in the window layout file so it survives assembly reloading
+        #endif
 
         [SerializeField]
         private MultiColumnHeaderState m_MultiColumnHeaderState;
@@ -91,7 +95,11 @@ namespace GameToolkit.Localization.Editor
                 // Check if it already exists (deserialized from window layout file or scriptable object)
                 if (m_TreeViewState == null)
                 {
+                    #if UNITY_6000_5_OR_NEWER
+                    m_TreeViewState = new TreeViewState<int>();
+                    #else
                     m_TreeViewState = new TreeViewState();
+                    #endif
                 }
 
                 bool firstInit = m_MultiColumnHeaderState == null;
@@ -288,7 +296,11 @@ namespace GameToolkit.Localization.Editor
         {
             foreach (var item in items)
             {
+                #if UNITY_6000_5_OR_NEWER
+                var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetEntityId());
+                #else
                 var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetInstanceID());
+                #endif
                 var newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
                 AssetDatabase.CopyAsset(assetPath, newPath);
             }
@@ -298,7 +310,11 @@ namespace GameToolkit.Localization.Editor
         {
             foreach (var item in items)
             {
+                #if UNITY_6000_5_OR_NEWER
+                var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetEntityId());
+                #else
                 var assetPath = AssetDatabase.GetAssetPath(item.LocalizedAsset.GetInstanceID());
+                #endif
                 AssetDatabase.MoveAssetToTrash(assetPath);
             }
         }
@@ -462,7 +478,11 @@ namespace GameToolkit.Localization.Editor
             return GetSelectedItemsAs<LocaleTreeViewItem>();
         }
 
+        #if UNITY_6000_5_OR_NEWER
+        private IEnumerable<T> GetSelectedItemsAs<T>() where T : TreeViewItem<int>
+        #else
         private IEnumerable<T> GetSelectedItemsAs<T>() where T : TreeViewItem
+        #endif
         {
             var selection = m_TreeView.GetSelection();
             var items = m_TreeView.GetRows()
